@@ -1,0 +1,24 @@
+{
+  "name": "event-management-api",
+  "version": "1.0.0",
+  "description": "This API is developed for assignment for Backend Intern Position at GyanGrove. See README.md for more details.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "watch": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Akash Sahu (akashsahu22082000@gmail.com)",
+  "license": "ISC",
+  "dependencies": {
+    "csv-parse": "^5.5.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.1",
+    "promised-sqlite3": "^2.1.0",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
