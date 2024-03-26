@@ -14,7 +14,7 @@ function parseDate(date) {
     if (typeof date !== 'string')
         return false;
 
-    const dateMatch = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(date);
+    const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
 
     if (!dateMatch || dateMatch.length < 4)
         return false;
