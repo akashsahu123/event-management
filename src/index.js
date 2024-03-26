@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 
 async function startServer() {
     try {
+        //Save events from provided csv files in database
         await loadEventsInDB();
 
         server.listen(PORT, () => {

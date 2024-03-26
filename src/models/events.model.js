@@ -1,6 +1,6 @@
 import { getDB } from "./db.js";
 import fs from "fs";
-import path, { resolve } from "path";
+import path from "path";
 import { parse } from "csv-parse";
 
 const __dirname = import.meta.dirname;
@@ -53,10 +53,9 @@ async function createEventsTable() {
 const DATA_FILE_URL = path.join(__dirname, "..", "..", "data", "events-dataset.csv");
 
 async function populateEvents() {
-    const db = await getDB();
     const createEventPromises = [];
 
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         fs.createReadStream(DATA_FILE_URL)
             .on("error", (err) => {
                 console.error('Error reading events-dataset.csv : ', err);
@@ -71,8 +70,8 @@ async function populateEvents() {
                 reject(err);
             })
             .on("end", async () => {
-                console.log('All Events from data file saved in database.');
                 resolve(Promise.all(createEventPromises));
+                console.log('All Events from data file saved in database.');
             })
     });
 }
@@ -106,20 +105,38 @@ async function createNewEvent(data) {
     });
 }
 
-async function findEvents(date, nextDays) {
+async function findEventsByDate(date, nextDays, page, pageSize) {
     const db = await getDB();
 
     return new Promise((resolve, reject) => {
         const startDate = new Date(date).getTime();
-        const endDate = startDate + (nextDays - 1) * 24 * 60 * 60 * 1000;
+        const endDate = startDate + (nextDays + 1) * 24 * 60 * 60 * 1000;
 
-        db.all('SELECT * FROM events WHERE date BETWEEN ? AND ? ORDER BY date', [startDate, endDate], (err, rows) => {
+        db.all(`SELECT event_name,city_name,date,latitude,longitude FROM events WHERE date BETWEEN ? AND ? ORDER BY date,time LIMIT ? OFFSET ?`, [startDate, endDate, pageSize, (page - 1) * pageSize], (err, events) => {
             if (err) {
                 reject(err);
                 return;
             }
 
-            resolve(rows);
+            db.get('SELECT count(*) FROM events WHERE date BETWEEN ? AND ?', [startDate, endDate], (err, row) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                resolve({
+                    events: events.map(event => {
+                        const date = new Date(event.date);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0');
+                        const day = String(date.getDate()).padStart(2, '0');
+                        const formattedDate = `${year}-${month}-${day}`;
+                        event.date = formattedDate;
+                        return event;
+                    }),
+                    totalEvents: row['count(*)']
+                });
+            });
         })
     });
 }
@@ -128,7 +145,7 @@ async function getAllEvents() {
     const db = await getDB();
 
     return new Promise((resolve, reject) => {
-        db.all('SELECT * FROM events ORDER BY date', (err, rows) => {
+        db.all('SELECT * FROM events ORDER BY date,time', (err, rows) => {
             if (err) {
                 reject(err);
                 return;
@@ -139,29 +156,9 @@ async function getAllEvents() {
     });
 }
 
-// async function run() {
-//     try {
-//         const db = await getDB();
-//         await loadEventsInDB();
-//         await createNewEvent({ event_name: 'Akash Sahu', city_name: 'Saharanpur', date: '2024-03-01', time: '9:30:00', latitude: 1.1, longitude: 1.1 });
-
-//         console.log((await findEvents('2024-03-01', 1)).map(row => {
-//             row.date = new Date(row.date).toISOString();
-//             return row;
-//         }));
-//     }
-//     catch (e) {
-//         console.log('Error:', e);
-//     }
-// }
-
-// run();
-
-// setInterval(run, 4000);
-
 export {
     loadEventsInDB,
     createNewEvent,
-    findEvents,
+    findEventsByDate,
     getAllEvents
 }

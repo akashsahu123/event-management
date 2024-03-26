@@ -1,66 +1,15 @@
-function parseDate(date) {
-    const dateMatch = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(date);
-
-    if (dateMatch.length == 0)
-        return false;
-
-    const year = Number(dateMatch[1]);
-    const month = Number(dateMatch[2]);
-    const day = Number(dateMatch[3]);
-
-    if (month < 1 || month > 12)
-        return false;
-
-    if (day < 1 || day > 31)
-        return false;
-
-    if (month === 2 && (year % 4 === 0 && day > 29 || year % 4 !== 0 && day > 28))
-        return false;
-
-    if ('4,6,9,11'.indexOf(String(month)) != -1 && day > 30)
-        return false;
-
-    return {
-        year,
-        month,
-        day
-    };
-}
-
-function parseTime(time) {
-    const timeMatch = /^(\d{2}):(\d{2}):(\d{2})$/.exec(time);
-
-    if (timeMatch.length == 0)
-        return false;
-
-    const hour = Number(timeMatch[1]);
-    const minute = Number(timeMatch[2]);
-    const second = Number(timeMatch[3]);
-
-    if (hour > 23 || minute > 59 || second > 59)
-        return false;
-
-    return {
-        hour,
-        minute,
-        second
-    };
-}
-
-function isValidLatitude(latitude) {
-    // Latitude range: -90 to 90 degrees
-    const latitudeRegex = /^-?([0-8]?[0-9]|90)(\.\d{1,15})?$/;
-    return latitudeRegex.test(String(latitude));
-}
-
-function isValidLongitude(longitude) {
-    // Longitude range: -180 to 180 degrees
-    const longitudeRegex = /^-?((1[0-7]|[0-9])?[0-9]|180)(\.\d{1,15})?$/;
-    return longitudeRegex.test(String(longitude));
-}
+import 'dotenv/config';
+import { createNewEvent, findEventsByDate } from "../models/events.model.js";
+import {
+    checkMissingFields,
+    parseDate,
+    parseTime,
+    isValidLatitude,
+    isValidLongitude
+} from "../utils/events.utils.js";
 
 
-function httpCreateNewEvent(req, res) {
+async function httpCreateNewEvent(req, res) {
     const contentType = req.headers['content-type'];
 
     if (!contentType || !contentType.includes('application/json')) {
@@ -71,39 +20,12 @@ function httpCreateNewEvent(req, res) {
 
     const data = req.body;
 
-    if (!data.city_name) {
-        return res.status(400).json({
-            error: 'Missing city_name field.'
-        });
-    }
+    const missingFields = checkMissingFields(['event_name', 'city_name', 'date', 'time', 'latitude', 'longitude'], data);
 
-    if (!data.event_name) {
+    if (missingFields.length > 0) {
         return res.status(400).json({
-            error: 'Missing event_name field.'
-        });
-    }
-
-    if (!data.date) {
-        return res.status(400).json({
-            error: 'Missing date field.'
-        });
-    }
-
-    if (!data.time) {
-        return res.status(400).json({
-            error: 'Missing time field.'
-        });
-    }
-
-    if (!data.latitude) {
-        return res.status(400).json({
-            error: 'Missing latitude field.'
-        });
-    }
-
-    if (!data.longitude) {
-        return res.status(400).json({
-            error: 'Missing longitude field.'
+            error: `Missing field${missingFields.length > 1 ? 's' : ''}.`,
+            missing_fields: missingFields
         });
     }
 
@@ -119,21 +41,23 @@ function httpCreateNewEvent(req, res) {
         })
     }
 
-    if (typeof data.date !== 'string' || !parseDate(data.date)) {
+    if (!parseDate(data.date)) {
         return res.status(400).json({
             error: 'Invalid date. Date should be string in YYYY-MM-DD format.'
         });
     }
 
-    const timeObj = parseTime(data.time);
+    const parsedTime = parseTime(data.time);
 
-    if (typeof data.time !== 'string' || !timeObj) {
+    if (!parsedTime) {
         return res.status(400).json({
             error: 'Invalid time. Time should be string in hh:mm:ss format.'
         });
     }
 
-    const dateTime = new Date(data.date).getTime() + timeObj.hour * 60 * 60 * 1000 + timeObj.minute * 60 * 1000 + timeObj.second * 1000;
+    const { hour, minute, second } = parsedTime;
+    //convert the date and time to number of milliseconds
+    const dateTime = new Date(data.date).getTime() + hour * 60 * 60 * 1000 + minute * 60 * 1000 + second * 1000;
 
     if (dateTime < new Date().getTime()) {
         return res.status(400).json({
@@ -141,21 +65,123 @@ function httpCreateNewEvent(req, res) {
         });
     }
 
-    if (typeof data.latitude !== 'number' || !isValidLatitude(data.latitude)) {
+    if (!isValidLatitude(data.latitude)) {
         return res.status(400).json({
-            error: "Invalid latitude. Latitude should be a number with at most 15 digits after decimal."
+            error: "Invalid latitude. Latitude should be a number between -90 to 90."
         });
     }
 
-    if (typeof data.longitude !== 'number' || !isValidLatitude(data.longitude)) {
+    if (!isValidLongitude(data.longitude)) {
         return res.status(400).json({
-            error: "Invalid longitude. Longitude should be a number with at most 15 digits after decimal."
+            error: "Invalid longitude. Longitude should be a number between -180 to 180."
         });
     }
+
+    await createNewEvent(data);
+
+    return res.status(201).json({
+        success: "Event created successfully."
+    });
 }
 
-function httpFindEvents(req, res) {
+async function httpFindEvents(req, res, next) {
+    const params = req.query;
 
+    const missingFields = checkMissingFields(['date', 'latitude', 'longitude'], params);
+
+    if (missingFields.length > 0) {
+        return res.status(400).json({
+            error: `Missing field${missingFields.length > 1 ? 's' : ''}.`,
+            missing_fields: missingFields
+        });
+    }
+
+    const date = params.date;
+
+    if (!parseDate(date)) {
+        return res.status(400).json({
+            error: 'Invalid date. Date should be string in YYYY-MM-DD format.'
+        });
+    }
+
+    const userLatitude = Number(params.latitude);
+
+    if (!isValidLatitude(userLatitude)) {
+        return res.status(400).json({
+            error: "Invalid latitude. Latitude should be a number between -90 to 90."
+        });
+    }
+
+    const userLongitude = Number(params.longitude);
+
+    if (!isValidLongitude(userLongitude)) {
+        return res.status(400).json({
+            error: "Invalid longitude. Longitude should be a number between -180 to 180."
+        });
+    }
+
+    if (params.page && !Number(params.page)) {
+        return res.status(400).json({
+            error: "Page should be a number."
+        });
+    }
+
+    const page = Number(params.page) || 1;
+    const pageSize = 10;
+    const queryResult = await findEventsByDate(date, 14, page, pageSize);
+    const totalPages = Math.ceil(queryResult.totalEvents / pageSize);
+
+    const eventsData = {
+        page,
+        pageSize,
+        totalEvents: queryResult.totalEvents,
+        totalPages,
+        events: []
+    }
+
+    if (page < 0 || page > totalPages) {
+        eventsData.error = "Page out of range.";
+        return res.status(400).json(eventsData);
+    }
+
+    const distancePromises = [];
+    const weatherPromises = [];
+
+    for (let event of queryResult.events) {
+        const weatherApiUrl = `${process.env.WEATHER_API_URL}?code=${process.env.WEATHER_API_CODE}&city=${event.city_name}&date=${event.date}`;
+        const distanceApiUrl = `${process.env.DISTANCE_API_URL}?code=${process.env.DISTANCE_API_CODE}&latitude1=${userLatitude}&longitude1=${userLongitude}&latitude2=${event.latitude}&longitude2=${event.longitude}`;
+        distancePromises.push(fetch(distanceApiUrl));
+        weatherPromises.push(fetch(weatherApiUrl));
+        delete event.latitude;
+        delete event.longitude;
+        eventsData.events.push(event);
+    }
+
+    try {
+        const responses = await Promise.all([...weatherPromises, ...distancePromises]);
+
+        responses.forEach(response => {
+            if (!response.ok)
+                throw new Error("Network response was not ok.");
+        });
+
+        const values = await Promise.all(responses.map(response => response.json())); //contains distances and weathers
+
+        for (let i = 0; i < values.length; ++i) {
+            if (i < eventsData.events.length) {
+                eventsData.events[i].weather = values[i].weather;
+            }
+            else {
+                eventsData.events[i - eventsData.events.length].distance_km = values[i].distance;
+            }
+        }
+
+        return res.status(200).json(eventsData);
+    }
+    catch (err) {
+        console.error('Error in events controller: ', err);
+        next(err);
+    }
 }
 
 export {

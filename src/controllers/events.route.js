@@ -18,7 +18,7 @@ eventsRouter.use((err, req, res, next) => {
     console.error('Error:', err.message);
 
     return res.status(500).json({
-        error: 'Internal server error.'
+        error: 'An error occurred.'
     });
 });
 

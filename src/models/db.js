@@ -20,7 +20,7 @@ async function getDB() {
 
         db.on('open', () => {
             resolve(db);
-        })
+        });
     });
 }
 
