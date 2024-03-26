@@ -8,6 +8,8 @@ Hence I decided to use Node.js due to its asynchronous and nonblocking I/O. In t
 I decided to use sqlite for this assignemt as it is lightweight SQL database engine, although other relational database engines like PostgreSQL, MySQL could have been used. 
 Data is structured with well-defined schema, so SQL is a good choice. I created B-Tree index on date column as multiple range queries had to be performed on date column.
 
+I am using MVC (Model View Controller) pattern. I have spliited my code according to it. My approach is that for incoming GET/POST request I am checking wether request data is complete (All reqeust fields are present and in correct format), and if it is the case, then I am performing the neccessary queries (INSERT or SELECT) and returning the response. 
+
 ## Installation and Configuration
 ### 1. Install Node.js
 Install Node.js : [https://nodejs.org/en/download](https://nodejs.org/en/download) (version>=20.11.1)
