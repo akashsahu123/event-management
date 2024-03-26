@@ -111,7 +111,7 @@ async function findEventsByDate(date, nextDays, page, pageSize) {
 
     return new Promise((resolve, reject) => {
         const startDate = new Date(date).getTime();
-        const endDate = startDate + (nextDays + 1) * 24 * 60 * 60 * 1000;
+        const endDate = startDate + (nextDays) * 24 * 60 * 60 * 1000;
 
         db.all(`SELECT event_name,city_name,date,latitude,longitude FROM events WHERE date BETWEEN ? AND ? ORDER BY date,time LIMIT ? OFFSET ?`, [startDate, endDate, pageSize, (page - 1) * pageSize], (err, events) => {
             if (err) {
