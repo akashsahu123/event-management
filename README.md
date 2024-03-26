@@ -42,6 +42,9 @@ DISTANCE_API_CODE="IAKvV2EvJa6Z6dEIUqqd7yGAu7IZ8gaH-a0QO6btjRc1AzFu8Y3IcQ=="
 npm start
 ```
 
+## Deployment
+This API is deployed on [https://event-management-1-z3s1.onrender.com](https://event-management-1-z3s1.onrender.com). You can use postman or similar softwares to test.
+
 ## Documentation
 **NOTE**: I have given curl commands. Use postman or similar software if any of the command doesn't work.
 
@@ -58,10 +61,15 @@ Request to this endpoint requires following query parameters:
 And following query parameter is optional:
 1. **page**: page number. Each page will have 10 events (except last page which may have less than 10 events).
 
-**Example of curl request:**
+**Example of Request:**
+
+Curl:
 ```
-curl -w "\n" "https://event-management-1-z3s1.onrender.com/events/find?date=2024-03-15&latitude=40.7128&longitude=-74.0060"
+curl -w "\n" "http://localhost:3000/events/find?date=2024-03-15&latitude=40.7128&longitude=-74.0060"
 ```
+
+Link: [https://event-management-1-z3s1.onrender.com/events/find?date=2024-03-15&latitude=40.7128&longitude=-74.0060](https://event-management-1-z3s1.onrender.com/events/find?date=2024-03-15&latitude=40.7128&longitude=-74.0060)
+
 
 #### Response Format
 Response will be in json format. If there is any error from client or server side, response will have 'error' field explaining the error.
@@ -91,9 +99,11 @@ Request body should be json. Required fields:
 5. **latitude**: Latitude of the event. It should be a real number in range [-90,90]
 6. **longitude**: Longitude of event. It should be a real number in range [-180,180]
 
-**Example of curl request:**
+**Example Request:**
+
+Curl:
 ```
-curl -X POST -H "Content-Type: application/json" -d "{\"event_name\":\"Shaurya 2024 IITR\",\"city_name\":\"saharanpur\",\"date\":\"2024-05-01\",\"time\":\"00:00:00\",\"latitude\":0,\"longitude\":0}" -w "\n" "https://event-management-1-z3s1.onrender.com/events"
+curl -X POST -H "Content-Type: application/json" -d "{\"event_name\":\"Shaurya 2024 IITR\",\"city_name\":\"saharanpur\",\"date\":\"2024-05-01\",\"time\":\"00:00:00\",\"latitude\":0,\"longitude\":0}" -w "\n" "http://localhost:3000/events"
 ```
 
 #### Response Format
