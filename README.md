@@ -60,7 +60,7 @@ And following query parameter is optional:
 
 **Example of curl request:**
 ```
-curl -w "\n" "http://localhost:3000/events/find?date=2024-03-15&latitude=40.7128&longitude=-74.0060"
+curl -w "\n" "https://event-management-1-z3s1.onrender.com/events/find?date=2024-03-15&latitude=40.7128&longitude=-74.0060"
 ```
 
 #### Response Format
@@ -93,7 +93,7 @@ Request body should be json. Required fields:
 
 **Example of curl request:**
 ```
-curl -X POST -H "Content-Type: application/json" -d "{\"event_name\":\"Shaurya 2024 IITR\",\"city_name\":\"saharanpur\",\"date\":\"2024-05-01\",\"time\":\"00:00:00\",\"latitude\":0,\"longitude\":0}" -w "\n" "http://localhost:3000/events"
+curl -X POST -H "Content-Type: application/json" -d "{\"event_name\":\"Shaurya 2024 IITR\",\"city_name\":\"saharanpur\",\"date\":\"2024-05-01\",\"time\":\"00:00:00\",\"latitude\":0,\"longitude\":0}" -w "\n" "https://event-management-1-z3s1.onrender.com/events"
 ```
 
 #### Response Format
