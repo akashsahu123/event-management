@@ -10,7 +10,7 @@ Data is structured with well-defined schema, so SQL is a good choice. I created 
 
 ## Installation and Configuration
 ### 1. Install Node.js
-Install Node.js : [https://nodejs.org/en/download](https://nodejs.org/en/download)
+Install Node.js : [https://nodejs.org/en/download](https://nodejs.org/en/download) (version>=20.11.1)
 
 ### 2. Clone this repository
 ```
