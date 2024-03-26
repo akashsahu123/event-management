@@ -2,7 +2,7 @@ function checkMissingFields(fields, data) {
     const missingFields = [];
 
     for (const field of fields) {
-        if (!data[field]) {
+        if (data[field] === undefined) {
             missingFields.push(field);
         }
     }
@@ -36,6 +36,8 @@ function parseDate(date) {
     //check for correct number of days in months having 30 days
     if ('4,6,9,11'.indexOf(String(month)) != -1 && day > 30)
         return false;
+
+    console.log('slls', year, month, day);
 
     return {
         year,

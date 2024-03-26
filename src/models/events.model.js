@@ -25,6 +25,7 @@ async function createEventsTable() {
     const db = await getDB();
 
     return new Promise((resolve, reject) => {
+        //date and time are stored as integers, by converting them to unix timestamp.
         db.run(`
         CREATE TABLE IF NOT EXISTS events(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
