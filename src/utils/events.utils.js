@@ -37,8 +37,6 @@ function parseDate(date) {
     if ('4,6,9,11'.indexOf(String(month)) != -1 && day > 30)
         return false;
 
-    console.log('slls', year, month, day);
-
     return {
         year,
         month,
