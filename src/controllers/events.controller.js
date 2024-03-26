@@ -133,7 +133,7 @@ async function httpFindEvents(req, res, next) {
 
     const eventsData = {
         page,
-        pageSize,
+        pageSize: queryResult.events.length,
         totalEvents: queryResult.totalEvents,
         totalPages,
         events: []

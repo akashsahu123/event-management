@@ -80,7 +80,7 @@ For example, if user forgets to include date parameter, then response will be:
 
 If there is no error, then response will have following fields (in JSON response):
 1. **page** : Page number. It will be 1 by default if you don't specify any page, otherwise it will be the page number which you specified in request parameters.
-2. **pageSize**: Maximum number of events per page.
+2. **pageSize**: Number of events in page specified by page field.
 3. **totalEvents**: Total number of events within next 14 days of the date specified in reqeust parameter.
 4. **totalPages**: Total number of pages.
 5. **events**: An array of objects. Each object will be corresponding to an event with keys : event_name, city_name, date, weather, distance_km.
